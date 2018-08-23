@@ -47,6 +47,7 @@ var listLabelling = [];
 var listsensors = [];
 var listLabelFinalTracking = [];
 var dataIndex, dataTime;
+var time_send_envrionment = 0;
 //Initialize all data and configuration;
 var init = DATA_Initialize();
 
@@ -80,8 +81,12 @@ client.onMessageArrived = function (message) {
 	//console.log (nb_person);
 	var dEnd = new Date().getTime();
 	showObject();
-	//getObjectJson();
-	//getEnvironnementJson();
+	getObjectJson();
+	if (( dataTime - time_send_envrionment) > 10*1000)
+	{
+		getEnvironnementJson();
+		time_send_envrionment = dataTime;
+	}
 	//getEstateJson();
 	//console.log (dEnd - dataTime);
 }
@@ -176,7 +181,7 @@ function getObjectJson()
 	all="{\"id\":"+dataIndex+",\"Client_Id\":"+Client_Id+",\"Building_Id\":"+Building_Id+",\"Room_Id\":"+Room_Id+",\"time\":"+dataTime+",\"person\":["
 	for (var i =0 ; i < TRACKING_MAX_OBJECT ; i++)
 	{
-		if ((listTracking[i].dispo == false)&&((listTracking[i].lastUpdateTime - listTracking[i].fistUpdateTime)>=2000))
+		if ((listTracking[i].isPeople)&&((listTracking[i].lastUpdateTime - listTracking[i].fistUpdateTime)>=2000))
 		{
 			if (addsymbole)
 			{
@@ -229,7 +234,7 @@ function getEnvironnementJson()
         	// Request finished. Do processing here.
     	}
 	}
-	xhr.send("data="+all+"&type_data=envrironment"); 
+	xhr.send("data="+all+"&type_data=environment"); 
 }
 function getEstateJson()
 {

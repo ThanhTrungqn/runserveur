@@ -26,7 +26,7 @@ var DATAPARSE_RADIUS_ADD_SPEED = 		1;			//pixel
 var DATAPARSE_SPEED_FAST = 				200;		//pixel
 var DATAPARSE_PERSON_MOVE_SIZE = 		2;			//pixel
 var DATAPARSE_TIME_PERSON_ACTIVE = 		1000;		//miliseconds
-var DATAPARSE_TIME_PERSON_INACTIVE = 	2000;		//miliseconds
+var DATAPARSE_TIME_PERSON_INACTIVE = 	1000;		//miliseconds
 //Configuration ImageProcessing
 
 //Configuration Tracking
@@ -42,6 +42,6 @@ var TRACKING_TIME_PERSON_INACTIVE = 	2000;		//miliseconds
 var DATASEND_SERVEUR_API = 'https://geo-api.predismart.com/integration-data'; //fournir par DATAPOLE
 var DATASEND_KEYWORD_DATA = 'data';					//fournir par DATAPOLE
 var DATASEND_KEYWORD_DATATYPE = 'type_data';		//fournir par DATAPOLE
-var DATASEND_TIME_ESTATEDATA =			0;			//miliseconds
-var DATASEND_TIME_ENVIRONMENT = 		10;			//miliseconds
-var DATASEND_TIME_GLOBAL = 				0;			//miliseconds
+var DATASEND_TIME_ESTATEDATA =			0;			//seconds
+var DATASEND_TIME_ENVIRONMENT = 		10;			//seconds
+var DATASEND_TIME_GLOBAL = 				0;			//seconds

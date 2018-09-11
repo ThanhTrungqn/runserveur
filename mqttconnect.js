@@ -81,12 +81,12 @@ client.onMessageArrived = function (message) {
 	//console.log (nb_person);
 	var dEnd = new Date().getTime();
 	showObject();
-	getObjectJson();
-	if (( dataTime - time_send_envrionment) > 10*1000)
-	{
-		getEnvironnementJson();
-		time_send_envrionment = dataTime;
-	}
+	//getObjectJson();
+	//if (( dataTime - time_send_envrionment) > 10*1000)
+	//{
+	//	getEnvironnementJson();
+	//	time_send_envrionment = dataTime;
+	//}
 	//getEstateJson();
 	//console.log (dEnd - dataTime);
 }
@@ -95,10 +95,11 @@ function showObject()
 	var all="";
 	for (var i =0 ; i < TRACKING_MAX_OBJECT ; i++)
 	{
-		var char = "ID " + i + " Size " + listTracking[i].S + " X " + listTracking[i].X + " Y " 
-		+ listTracking[i].Y + " fistId  " + listTracking[i].firstUpdateId + " lastId   " + listTracking[i].lastUpdateId 
-		+ " dispo   " + listTracking[i].dispo + " isPeople   " + listTracking[i].isPeople +'<br>' ;
-		all += char;
+			var char = "ID " + i + " Size " + listTracking[i].S + " X " + listTracking[i].X + " Y " 
+			+ listTracking[i].Y + " fistId  " + listTracking[i].firstUpdateId + " lastId   " + listTracking[i].lastUpdateId 
+			+ " dispo   " + listTracking[i].dispo+ " FirstX " + listTracking[i].firstX + " FirstY " + listTracking[i].firstY + " isPeople   " + listTracking[i].isPeople +'<br>' ;
+			all += char;
+		
 	}
 	document.getElementById("demo").innerHTML = all;
 }
@@ -158,7 +159,9 @@ function DATA_Initialize(){
 	//Initializing list Tracking
 	for (var i = 0 ; i < TRACKING_MAX_OBJECT ; i ++)
 	{
-		var person= {id:i,X:0,Y:0,S:0,isPeople:false,firstUpdateId:0,firstUpdateTime:0,direction:0,speed:0,direction:0,speed:0,lastUpdateId:0,lastUpdateTime:0,dispo:true};
+		var person= {id:i,X:0,Y:0,S:0,isPeople:false,
+			firstUpdateId:0,firstUpdateTime:0,direction:0,speed:0,direction:0,
+			lastUpdateId:0,lastUpdateTime:0,dispo:true,firstX:0,firstY:0};
 		listTracking.push(person);
 	}
 	//Initializing list Label
@@ -181,7 +184,7 @@ function getObjectJson()
 	all="{\"id\":"+dataIndex+",\"Client_Id\":"+Client_Id+",\"Building_Id\":"+Building_Id+",\"Room_Id\":"+Room_Id+",\"time\":"+dataTime+",\"person\":["
 	for (var i =0 ; i < TRACKING_MAX_OBJECT ; i++)
 	{
-		if ((listTracking[i].isPeople)&&((listTracking[i].lastUpdateTime - listTracking[i].fistUpdateTime)>=2000))
+		if ((listTracking[i].isPeople)&&((listTracking[i].lastUpdateTime - listTracking[i].firstUpdateTime)>=2000))
 		{
 			if (addsymbole)
 			{

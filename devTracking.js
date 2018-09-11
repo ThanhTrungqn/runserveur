@@ -92,7 +92,7 @@ function TRACKING(listLabel , listTracking , dataIndex , dataTime){
 		{
 			var tLabel = listLabel[i];
 			var list_updated, type1 , type2, type3;
-			[list_updated , type3 , type2 , type1]=TRACKING_SearchPeople( listLabel[i] , listTracking ,dataIndex , dataTime , false); //update xong list
+			[list_updated , type3 , type2 , type1]=TRACKING_SearchPeople( listLabel[i] , listTracking ,dataIndex , dataTime , true); //update xong list
 			if (list_updated.length == 1)
 			{
 				console.log ("go here 444");
@@ -136,15 +136,19 @@ function TRACKING(listLabel , listTracking , dataIndex , dataTime){
 			console.log("go here 666");
 			var tLabel = listLabel[i];
 			var newObject = true;
+			//New khong co vat nao o gan do bien mat
+
 			var idObject = TRACKING_FindIdObjectFree();
 			TRACKING_UpdateObject (newObject, idObject, tLabel, dataIndex, dataTime);
 			TRACKING_UpdatedLabel(i,listLabel);
 		}
 	}
-	//Step 6 : decide nombre de person
+	//Step 6 : kiểm tra  các vật biến mất và xem nguyên nhân
+	TRACKING_PersonDisparu(dataIndex);
+	//Step 7 : decide nombre de person
 	var count = TRACKING_DecidePerson(dataIndex);
 	console.log ("nombre "+count);
-	//Step 7 : Update listTracking
+	//Step 8 : Update listTracking
 	TRACKING_UpdateObjectFree(dataIndex);
 }
 
@@ -164,6 +168,45 @@ function TRACKING_DecidePerson(index){
 	}
 	return count;
 }
+
+function TRACKING_PersonDisparu(index){
+	for (var i = 0 ; i < listTracking.length ; i++ )
+	{
+		//tính theo thời gian cho chính xác
+		//i <=> old person
+		if ((listTracking[i].isPeople)&&(listTracking[i].lastUpdateId <= (index-2)))
+		{
+			//It mean this person will disparue
+			//Try to match with new object
+			for (var j = 0 ; j < listTracking.length ; j++ )
+			{
+				//j <=> new person
+				if ((listTracking[j].isPeople==false)&&(listTracking[j].dispo == false)){
+					//thêm điều kiện ko phải xuất hiện tại cửa nữa cho chắc
+					//đây là vật vừa mới xuất hiện
+					var difX = listTracking[j].firstX - listTracking[i].X;
+					var difY = listTracking[j].firstY - listTracking[i].Y;
+					if (difX < 0)
+					{
+						difX = -difX;
+					}
+					if (difY < 0)
+					{
+						difY = -difY;
+					}
+					if ( max(difX,difY) < 15){
+						console.log("go here 777");
+						//Update here
+						//coppy j in i
+						TRACKING_ChangeObject (j,i);
+						return true;
+					}
+				}
+			}
+		}
+	}
+}
+
 function TRACKING_UpdatedLabel (index,listLabel){
 	listStateLabel[index].tUpdated = true;
 }
@@ -209,6 +252,8 @@ function TRACKING_UpdateObject (newObject , idObject , tLabel , dataIndex , data
 			listTracking[idObject].direction = 0;
 			listTracking[idObject].speed = 0;
 			listTracking[idObject].isPeople = false;
+			listTracking[idObject].firstX = tLabel.X;
+			listTracking[idObject].firstY = tLabel.Y;
 		}
 		else
 		{
@@ -230,11 +275,30 @@ function TRACKING_UpdateObject (newObject , idObject , tLabel , dataIndex , data
 		console.log("invalide idObject");
 	}
 }
+function TRACKING_ChangeObject (idObject_src,idObject_des){
+	//checking if valide idObject
+	if((idObject_src >= 0) &&(idObject_src <= TRACKING_MAX_OBJECT) 
+		&& (idObject_des >= 0) &&(idObject_des <= TRACKING_MAX_OBJECT)
+		&& (idObject_src != idObject_des))
+	{
+		listTracking[idObject_des].X = listTracking[idObject_src].X;
+		listTracking[idObject_des].Y = listTracking[idObject_src].Y;
+		listTracking[idObject_des].S = listTracking[idObject_src].S;
+		listTracking[idObject_des].lastUpdateId = listTracking[idObject_src].lastUpdateId;
+		listTracking[idObject_des].lastUpdateTime = listTracking[idObject_src].lastUpdateTime;
+		listTracking[idObject_des].dispo = false;
+		listTracking[idObject_src].dispo = true;
+	}
+	else
+	{
+		console.log("invalide idObject");
+	}
+}
 
 /*************************************************************************************************/
 //Research in Radius
 function TRACKING_SearchPeople(tLabel , listTracking , dataIndex , dataTime , isPeople){
-	var thight ,_width ,_height ,width;
+	var hight ,_width ,_height ,width;
 	var distance = 255;
 	var tableau = [];
 	var type1 = 0;
@@ -256,7 +320,9 @@ function TRACKING_SearchPeople(tLabel , listTracking , dataIndex , dataTime , is
 		{
 			valide = true;
 		}
-		if ((listTracking[i].lastUpdateId > (dataIndex - 10)) && (valide))
+		//verifier if this personne isnt updated for this data
+		if ((listTracking[i].lastUpdateId > (dataIndex - 10)) && (valide) 
+			&& (listTracking[i].lastUpdateId != dataIndex))
 		{
 			var maxdif;
 			//calculate size Radius

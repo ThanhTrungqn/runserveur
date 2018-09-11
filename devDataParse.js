@@ -27,7 +27,7 @@ function parseJson(message) {
 		var json_presence    = json.luminaire.sensors.presence;
 		var json_tlabel = json.luminaire.sensors.tLabel;
 		var json_luminosity = json.luminaire.sensors.luminosity;
-		var json_sound = json.luminaire.sensors.luminosity;
+		var json_sound = json.luminaire.sensors.sound_level;
 		var json_consumption = json.luminaire.sensors.consumption;
 		var json_temperature = json.luminaire.sensors.temperature;
 		var json_presence = json.luminaire.sensors.presence;

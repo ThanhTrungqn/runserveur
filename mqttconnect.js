@@ -1,5 +1,5 @@
 //*****************************************************************//
-var TRACKING_RADIUS_DEFAULT = 6;
+var TRACKING_RADIUS_DEFAULT = 8;
 var TRACKING_RADIUS_ADD_DIRECTION = 2;
 var TRACKING_RADIUS_ADD_SPEED = 1;
 var TRACKING_SPEED_FAST = 200;
@@ -48,9 +48,10 @@ var listsensors = [];
 var listLabelFinalTracking = [];
 var dataIndex, dataTime;
 var time_send_envrionment = 0;
+var listTracking_Old =[];
 //Initialize all data and configuration;
 var init = DATA_Initialize();
-
+var nb_person=0;
 //Gets called whenever you receive a message for your subscriptions
 client.onMessageArrived = function (message) {
 	dataTime = new Date().getTime();		//Get time before processing
@@ -76,18 +77,19 @@ client.onMessageArrived = function (message) {
 		//Todo: fiabilite cet partie
 
 		//Step 5: Tracking listLabelFinalTracking
-		var nb_person = TRACKING(listLabelFinalTracking , listTracking , dataIndex , dataTime);
+		nb_person = TRACKING(listLabelFinalTracking , listTracking , dataIndex , dataTime);
 	}
 	//console.log (nb_person);
 	var dEnd = new Date().getTime();
 	showObject();
-	//getObjectJson();
-	//if (( dataTime - time_send_envrionment) > 10*1000)
-	//{
-	//	getEnvironnementJson();
-	//	time_send_envrionment = dataTime;
-	//}
-	//getEstateJson();
+	draw();
+	//This section for send data to the serveur
+	getObjectJson();
+	if (( dataTime - time_send_envrionment) > 10*1000)
+	{
+		getEnvironnementJson();
+		time_send_envrionment = dataTime;
+	}
 	//console.log (dEnd - dataTime);
 }
 function showObject()
@@ -95,13 +97,15 @@ function showObject()
 	var all="";
 	for (var i =0 ; i < TRACKING_MAX_OBJECT ; i++)
 	{
-			var char = "ID " + i + " Size " + listTracking[i].S + " X " + listTracking[i].X + " Y " 
-			+ listTracking[i].Y + " fistId  " + listTracking[i].firstUpdateId + " lastId   " + listTracking[i].lastUpdateId 
-			+ " dispo   " + listTracking[i].dispo+ " FirstX " + listTracking[i].firstX + " FirstY " + listTracking[i].firstY + " isPeople   " + listTracking[i].isPeople +'<br>' ;
-			all += char;
+		var char = "ID " + i + " Size " + listTracking[i].S + " X " + listTracking[i].X + " Y " 
+		+ listTracking[i].Y + " fistId  " + listTracking[i].firstUpdateId + " lastId   " + listTracking[i].lastUpdateId 
+		+ " dispo   " + listTracking[i].dispo+ " FirstX " + listTracking[i].firstX + " FirstY " + listTracking[i].firstY + " isPeople   " + listTracking[i].isPeople
+		+ " isbigPpeople " + listTracking[i].isbigObject + " IDnear " + listTracking[i].listIdNear.length +'<br>' ;
+		all += char;
 		
 	}
 	document.getElementById("demo").innerHTML = all;
+	document.getElementById("number").innerHTML = "people "+ nb_person;
 }
 /**************************************************************************/
 function Labeling(listLabelling) {
@@ -157,12 +161,57 @@ function DATA_Initialize(){
 	dataIndex = 0;
 	dataTime = 0;
 	//Initializing list Tracking
+	var listNull=[];
 	for (var i = 0 ; i < TRACKING_MAX_OBJECT ; i ++)
 	{
-		var person= {id:i,X:0,Y:0,S:0,isPeople:false,
-			firstUpdateId:0,firstUpdateTime:0,direction:0,speed:0,direction:0,
-			lastUpdateId:0,lastUpdateTime:0,dispo:true,firstX:0,firstY:0};
+		var person= {
+			id:i,
+			X:0,
+			Y:0,
+			S:0,
+			isPeople:false,
+			move:false,
+			firstUpdateId:0,
+			firstUpdateTime:0,
+			direction:0,
+			speed:0,
+			lastUpdateId:0,
+			lastUpdateTime:0,
+			dispo:true,
+			firstX:0,
+			firstY:0,
+			id_label:0,
+			listIdbigObject:listNull,
+			isbigObject:0,
+			listIdNear:listNull
+		};
 		listTracking.push(person);
+	}
+	//Initializing listTracking_Old
+	for (var i = 0 ; i < TRACKING_MAX_OBJECT ; i ++)
+	{
+		var person= {
+			id:i,
+			X:0,
+			Y:0,
+			S:0,
+			isPeople:false,
+			move:false,
+			firstUpdateId:0,
+			firstUpdateTime:0,
+			direction:0,
+			speed:0,
+			lastUpdateId:0,
+			lastUpdateTime:0,
+			dispo:true,
+			firstX:0,
+			firstY:0,
+			id_label:0,
+			listIdbigObject:listNull,
+			isbigObject:0,
+			listIdNear:listNull
+		};
+		listTracking_Old.push(person);
 	}
 	//Initializing list Label
 	var obSensors = { mac : 0,ip : 0, luminosity : 0, sound : 0, comsumption : 0 , temperature : 0, presence :0};
@@ -170,6 +219,7 @@ function DATA_Initialize(){
 		listLabelling[i] =[];
 		listsensors[i]=obSensors;
 	}
+	getEstateJson();
 	return true;
 } 
 /***********************************************************************************************/
@@ -181,6 +231,8 @@ function getObjectJson()
 {
 	var all="";
 	var addsymbole=false;
+	cell_value=0;
+	zone_interet_value=0
 	all="{\"id\":"+dataIndex+",\"Client_Id\":"+Client_Id+",\"Building_Id\":"+Building_Id+",\"Room_Id\":"+Room_Id+",\"time\":"+dataTime+",\"person\":["
 	for (var i =0 ; i < TRACKING_MAX_OBJECT ; i++)
 	{
@@ -192,18 +244,19 @@ function getObjectJson()
 			}
 			var char = "{\"ID\":"+i+",\"Size\":"+listTracking[i].S+",\"X\":"+listTracking[i].X+",\"Y\":"
 			+ listTracking[i].Y +",\"Direction\":"+listTracking[i].direction+",\"Speed\":"+listTracking[i].speed
-			+",\"FirstTime\":"+listTracking[i].firstUpdateTime+",\"LastTime\":"+listTracking[i].lastUpdateTime+"}";
+			+",\"FirstTime\":"+listTracking[i].firstUpdateTime+",\"LastTime\":"+listTracking[i].lastUpdateTime
+			+",\"id_cell\":"+ cell_value
+			+",\"id_zone\":"+ zone_interet_value
+			+"}";
 			all += char;
 			addsymbole= true;
 		}
 	}
-	all+="]}"
+	all+="],\"actions_button\":[]}"
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", 'https://geo-api.predismart.com/integration-data', true);
-
 	//Send the proper header information along with the request
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
 	xhr.onreadystatechange = function() {//Call a function when the state changes.
     	if(this.readyState == XMLHttpRequest.DONE && this.status == 200) {
         	// Request finished. Do processing here.
@@ -215,14 +268,14 @@ function getEnvironnementJson()
 {
 	var all="";
 	var addsymbole=false;
-	all="{\"id\":"+dataIndex+",\"Client_Id\":"+Client_Id+",\"Building_Id\":"+Building_Id+",\"Room_Id\":"+Room_Id+",\"time\":"+dataTime+",\"listLuminaire\":["
+	all="{\"client_id\":"+Client_Id+",\"building_id\":"+Building_Id+",\"room_dd\":"+Room_Id+",\"time\":"+dataTime+",\"data\":["
 	for (var i =0 ; i < listConfigLuminaire.length ; i++)
 	{
 		if (addsymbole)
 		{
 			all +=",";
 		}
-		var char ="{\"mac\":"+listsensors[i].mac+ ",\"sensors\":{\"presence\":"+listsensors[i].presence+",\"luminosity\":"+listsensors[i].luminosity
+		var char ="{\"id_cell\":"+"\""+listConfigLuminaire[i].id+"\""+ ",\"sensors\":{\"presence\":"+listsensors[i].presence+",\"luminosity\":"+listsensors[i].luminosity
 		+",\"temperature\":"+listsensors[i].temperature+",\"sound\":"+listsensors[i].sound+",\"consumption\":"+listsensors[i].consumption+"}}";
 		all += char;
 		addsymbole= true;
@@ -243,20 +296,30 @@ function getEstateJson()
 {
 	var all="";
 	var addsymbole=false;
-	all="{\"id\":"+dataIndex+",\"Client_Id\":"+Client_Id+",\"Building_Id\":"+Building_Id+",\"Room_Id\":"+Room_Id+",\"listConfigLuminaire\":["
+	all="{\"client_id\":"+Client_Id+",\"building_id\":"+Building_Id+",\"room_id\":"+Room_Id+",\"list_cell\":["
 	for (var i =0 ; i < listConfigLuminaire.length ; i++)
 	{
 		if (addsymbole)
 		{
 			all +=",";
 		}
-		var char ="{\"mac\":"+"\""+listConfigLuminaire[i].mac+"\""+",\"PosX\":"+listConfigLuminaire[i].PosX+",\"PosY\":"+listConfigLuminaire[i].PosY
-		+",\"rotation\":"+listConfigLuminaire[i].rotation+"}";
+		var char ="{\"id\":"       + "\"" + listConfigLuminaire[i].id 	+ "\","
+				  +"\"firmware\":" + "\"" + Firmware 					+ "\","
+				  +"\"mac_eyo\":"  + "\"" + listConfigLuminaire[i].mac 	+ "\","
+				  +"\"PosX\":"			  + listConfigLuminaire[i].PosX + ","
+				  +"\"PosY\":" 			  + listConfigLuminaire[i].PosY + ","
+				  +"\"PosZ\":" 			  + Etage 						+ ","
+				  +"\"cordonnes_contour\":["
+				  +"["+listConfigLuminaire[i].PosX+","+listConfigLuminaire[i].PosY+","+Etage+"]"
+				  +"["+(listConfigLuminaire[i].PosX+32)+","+listConfigLuminaire[i].PosY+","+Etage+"]"
+				  +"["+(listConfigLuminaire[i].PosX+32)+","+(listConfigLuminaire[i].PosY+32)+","+Etage+"]"
+				  +"["+listConfigLuminaire[i].PosX+","+(listConfigLuminaire[i].PosY+32)+","+Etage+"]"+"],"
+				  +"\"rotation\":"+ 0 + ","
+				  +"zone_interet:[]"
+				  +"}";
 		all += char;
-		addsymbole= true;
 	}
-	all+="]}"
-	console.log(all);
+	all +="]"+"\"list_object\":[],"+"\"list_button\":[],"+"\"tracking_config\":{}}";
 	//publish (all, topic_send_environnement , 0);
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", 'https://geo-api.predismart.com/integration-data', true);

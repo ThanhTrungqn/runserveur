@@ -57,70 +57,76 @@ function dataConvert (listLabel , idLuminaire ) {
 		var lumPosY = listConfigLuminaire[idLuminaire].PosY;
 		for ( var i = 0 ; i < listLabel.length ; i++)
 		{
-			var s = listLabel[i].size;
-			var t = listLabel[i].t + lumPosY;
-			var b = listLabel[i].b + lumPosY;
-			var l = listLabel[i].l + lumPosX;
-			var r = listLabel[i].r + lumPosX;
+			if (((listLabel[i].t+listLabel[i].b) >= 4 )
+				&&((listLabel[i].t+listLabel[i].b) <= 58 )
+				&&((listLabel[i].r+listLabel[i].l) >= 4 )
+				&&((listLabel[i].r+listLabel[i].l) <= 58 ))
+			{
+				var s = listLabel[i].size;
+				var t = listLabel[i].t + lumPosY;
+				var b = listLabel[i].b + lumPosY;
+				var l = listLabel[i].l + lumPosX;
+				var r = listLabel[i].r + lumPosX;
 
-			//here update function deteriner bord
-			//reupdate top bottom left right if object near bord
-			var tBord = false, bBord = false, lBord = false, rBord = false;
-			var sizegrandir = 6;
-			if (s <=10 )
-			{
-				sizegrandir = 8;
-			}
-			if ( listLabel[i].t <= BORDSIZE )
-			{
-				tBord = true;
-				if (s <=20)
+				//here update function deteriner bord
+				//reupdate top bottom left right if object near bord
+				var tBord = false, bBord = false, lBord = false, rBord = false;
+				var sizegrandir = 6;
+				if (s <=10 )
 				{
-					if (t >=sizegrandir){
-						t -=sizegrandir;
-					}
-					else
-					{	
-						t = 0;
-					}
+					sizegrandir = 8;
 				}
-			}
-			if ( listLabel[i].b >= (IMAGEHEIGHT - BORDSIZE))
-			{
-				bBord = true;
-				if (s <=20)
+				if ( listLabel[i].t <= BORDSIZE )
 				{
-					b +=sizegrandir;
-				}
-			}
-			if ( listLabel[i].l <= BORDSIZE)
-			{
-				lBord = true;
-				if (s <=20)
-				{
-					if (l >=sizegrandir){
-						l -=sizegrandir;
-					}
-					else
+					tBord = true;
+					if (s <=20)
 					{
-						l = 0;
+						if (t >=sizegrandir){
+							t -=sizegrandir;
+						}
+						else
+						{	
+							t = 0;
+						}
 					}
 				}
-			}
-			if ( listLabel[i].r >= (IMAGEHEIGHT - BORDSIZE))
-			{
-				rBord = true;
-				if (s <=20)
+				if ( listLabel[i].b >= (IMAGEHEIGHT - BORDSIZE))
 				{
-					r +=sizegrandir;
+					bBord = true;
+					if (s <=20)
+					{
+						b +=sizegrandir;
+					}
 				}
+				if ( listLabel[i].l <= BORDSIZE)
+				{
+					lBord = true;
+					if (s <=20)
+					{
+						if (l >=sizegrandir){
+							l -=sizegrandir;
+						}
+						else
+						{
+							l = 0;
+						}
+					}
+				}
+				if ( listLabel[i].r >= (IMAGEHEIGHT - BORDSIZE))
+				{
+					rBord = true;
+					if (s <=20)
+					{
+						r +=sizegrandir;
+					}
+				}
+				var x = (l + r)/2;
+				var y = (t + b)/2;
+				var id = [idLuminaire];
+				var obLabel = { idLum : id, S : s, X : x, Y : y, T : t, B :b, L :l, R : r, 
+						TOPBORD : tBord, BOTTOMBORD : bBord, LEFTBORD : lBord, RIGHTBORD : rBord , updated : false , tUpdated : false};
+				new_listLabel.push(obLabel);
 			}
-			var x = (l + r)/2;
-			var y = (t + b)/2;
-			var id = [idLuminaire];
-			var obLabel = { idLum : id, S : s, X : x, Y : y, T : t, B :b, L :l, R : r, 
-					TOPBORD : tBord, BOTTOMBORD : bBord, LEFTBORD : lBord, RIGHTBORD : rBord , updated : false , tUpdated : false};
-			new_listLabel.push(obLabel);
 		}
 		return [ true , new_listLabel];
 	}

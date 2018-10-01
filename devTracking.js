@@ -185,22 +185,10 @@ function TRACKING_DecidePerson(index , time){
 				if (listTracking[i].move)
 				{
 					//check xem vị trí đầu tiên ở đâu
-					if (listTracking[i].listIdNear.length >=2)
+					if (listTracking[i].listIdNear >=0 )
 					{
-						//Nếu trong list vẫn là người to thì xóa 1 người
-						for (var j = 0 ; j < listTracking[i].listIdNear.length ; j++)
-						{
-							var id_people = listTracking[i].listIdNear[j];
-							if ((listTracking[id_people].isPeople==true)
-								&&(listTracking[id_people].lastUpdateId == index)
-								&&(listTracking[id_people].isBigObject >1))
-							{
-								console.log("switch here")
-								TRACKING_ChangeObject (i,id_people);
-								break;
-							}
-
-						}
+						console.log("switch here");
+						TRACKING_ChangeObject (i,listTracking[i].listIdNear);
 					}
 					else
 					{
@@ -228,68 +216,72 @@ function TRACKING_PersonDisparu(index,time_index ,listLabel){
 		//Người biến mất thì hãy tìm
 		if ( (listTracking[i].isPeople == true) && (listTracking[i].lastUpdateTime < time_index))
 		{
-			var update=false; 
-			//vật này đang sắp biết mất
-			//Tìm lại trong list, có vật nào vừa xuất hiện không 
-			if (update==false)
+			//Kiểm tra biến mất ở đâu => nếu biến mất ở cửa thì bye bye
+			if (TRACKING_CheckNearBord(listTracking[i].X,listTracking[i].Y)==false)
 			{
-				for (var j = 0 ; j < listTracking.length ; j++ )
+				var update=false; 
+				//vật này đang sắp biết mất
+				//Tìm lại trong list, có vật nào vừa xuất hiện không 
+				if (update==false)
 				{
-					//đi nhanh quá nè chú đi chậm lại chút nào
-					//Tìm những vật vừa mới xuất hiện trong khoảng thời gian
-					if ((((listTracking[j].firstUpdateTime - listTracking[i].lastUpdateTime) < 500 )
-						|| ((listTracking[i].lastUpdateTime -listTracking[j].firstUpdateTime) < 500 ) )
-						&& (listTracking[j].lastUpdateTime == time_index)
-						&& (listTracking[j].isPeople == false))
+					for (var j = 0 ; j < listTracking.length ; j++ )
 					{
-						//Kiểm tra tọa độ thỏa mãn hay không
-						//Vị trí xuất hiện đầu tiên
-						var difX = listTracking[j].firstX - listTracking[i].X;
-						var difY = listTracking[j].firstY - listTracking[i].Y;
+						//đi nhanh quá nè chú đi chậm lại chút nào
+						//Tìm những vật vừa mới xuất hiện trong khoảng thời gian
+						if ((((listTracking[j].firstUpdateTime - listTracking[i].lastUpdateTime) < 500 )
+							|| ((listTracking[i].lastUpdateTime -listTracking[j].firstUpdateTime) < 500 ) )
+							&& (listTracking[j].lastUpdateTime == time_index)
+							&& (listTracking[j].isPeople == false))
+						{
+							//Kiểm tra tọa độ thỏa mãn hay không
+							//Vị trí xuất hiện đầu tiên
+							var difX = listTracking[j].firstX - listTracking[i].X;
+							var difY = listTracking[j].firstY - listTracking[i].Y;
+							if (difX < 0)
+							{
+								difX = - difX;
+							}
+							if (difY < 0)
+							{
+								difY = - difY;
+							}
+							console.log("difX: "+difX );
+							console.log("difY: "+difY );
+							if ( max(difX,difY) <= 12){
+								console.log("go here 777");
+								//coppy j in i
+								TRACKING_ChangeObject (j,i);
+								update = true;
+								break;
+							}
+						}
+					}
+						
+				}
+				if (update==false)
+				{
+					//To mà chỉ update 1 nè
+					//=> Xem list cũ, nó ở bên cạnh đứa nào => đứa đó được update ở đâu
+					for (var j=0; j < listLabel.length ; j++ )
+					{
+						var difX = listLabel[j].X -  listTracking[i].X;	
+						var difY = listLabel[j].Y -  listTracking[i].Y;
 						if (difX < 0)
 						{
-							difX = - difX;
+							difX = -difX;
 						}
 						if (difY < 0)
 						{
-							difY = - difY;
+							difY = -difY;
 						}
-						console.log("difX: "+difX );
-						console.log("difY: "+difY );
-						if ( max(difX,difY) <= 12){
-							console.log("go here 777");
-							//coppy j in i
-							TRACKING_ChangeObject (j,i);
+						//thêm đk size nữa
+						if ((difX <= 6) && (difY <= 6)){
+							console.log("go here big big big object");
+							var listId=[];
+							TRACKING_UpdateObject (false, i, listLabel[j], index, time_index , 2 , listId);
 							update = true;
 							break;
 						}
-					}
-				}
-					
-			}
-			if (update==false)
-			{
-				//To mà chỉ update 1 nè
-				//=> Xem list cũ, nó ở bên cạnh đứa nào => đứa đó được update ở đâu
-				for (var j=0; j < listLabel.length ; j++ )
-				{
-					var difX = listLabel[j].X -  listTracking[i].X;	
-					var difY = listLabel[j].Y -  listTracking[i].Y;
-					if (difX < 0)
-					{
-						difX = -difX;
-					}
-					if (difY < 0)
-					{
-						difY = -difY;
-					}
-					//thêm đk size nữa
-					if ((difX <= 6) && (difY <= 6)){
-						console.log("go here big big big object");
-						var listId=[];
-						TRACKING_UpdateObject (false, i, listLabel[j], index, time_index , 2 , listId);
-						update = true;
-						break;
 					}
 				}
 			}		
@@ -346,11 +338,11 @@ function TRACKING_UpdateObject (newObject , idObject , tLabel , dataIndex , data
 			listTracking[idObject].firstY = tLabel.Y;
 			listTracking[idObject].move = false;
 			//Need function check voisinage when this person exist
-			listTracking[idObject].listIdNear=[];
-			for (var i = 0 ; i < listIdNear.length ; i ++ )
-			{
-				listTracking[idObject].listIdNear[i]=listIdNear[i];
-			}
+			listTracking[idObject].listIdNear=listIdNear;
+			//for (var i = 0 ; i < listIdNear.length ; i ++ )
+			//{
+			//	listTracking[idObject].listIdNear[i]=listIdNear[i];
+			//}
 		}
 		else
 		{
@@ -406,6 +398,7 @@ function TRACKING_ChangeObject (idObject_src,idObject_des){
 		listTracking[idObject_des].lastUpdateTime = listTracking[idObject_src].lastUpdateTime;
 		listTracking[idObject_des].dispo = false;
 		listTracking[idObject_src].dispo = true;
+		listTracking[idObject_src].isPeople = false;
 	}
 	else
 	{
@@ -712,46 +705,108 @@ function TRACKING_SearchPeople3(tLabel , t_listTracking , dataIndex , dataTime)
 }
 function TRACKING_SearchListIdPeopleNear(tLabel , t_listTracking , dataIndex , dataTime)
 {
-	var list_id=[];
-	for (var i = 0 ; i < t_listTracking.length ; i++ )
+	if ( TRACKING_CheckNearBord(tLabel.X ,  tLabel.Y) == false)
 	{
-		if ((t_listTracking[i].dispo == false) && (t_listTracking[i].isPeople))
+		var list_id=[];
+		var max_value=255;
+		var id=-1;
+		for (var i = 0 ; i < t_listTracking.length ; i++ )
 		{
-			//calculate size Radius
-			var difX = t_listTracking[i].X - tLabel.X;
-			var difY = t_listTracking[i].Y - tLabel.Y;
-			var compareY = 6;
-			var compareX = 6;
-			if (difX < 0)
+			if ((t_listTracking[i].dispo == false) && (t_listTracking[i].isPeople))
 			{
-				difX = 0 - difX;
-			}
-			if (difY < 0)
-			{
-				difY = 0 - difY;
-			}
+				//calculate size Radius
+				var difX = t_listTracking[i].X - tLabel.X;
+				var difY = t_listTracking[i].Y - tLabel.Y;
+				var compareY = 8;
+				var compareX = 8;
+				if (difX < 0)
+				{
+					difX = 0 - difX;
+				}
+				if (difY < 0)
+				{
+					difY = 0 - difY;
+				}
 
-			if ((difX <= compareX) && (difY <= compareY))
-			{
-				list_id.push(i);
+				if ((difX <= compareX) && (difY <= compareY))
+				{
+					if ( max_value > max(difY , difX))
+					{
+						id = i;
+						max_value = max(difY , difX);
+					}
+				}
 			}
 		}
+		if (id==-1)
+		{
+			for (var i = 0 ; i < t_listTracking.length ; i++ )
+			{
+				if ((t_listTracking[i].dispo == false) && (t_listTracking[i].isPeople))
+				{
+					//calculate size Radius
+					var difX = t_listTracking[i].X - tLabel.X;
+					var difY = t_listTracking[i].Y - tLabel.Y;
+					var compareY = 12;
+					var compareX = 12;
+					if (difX < 0)
+					{
+						difX = 0 - difX;
+					}
+					if (difY < 0)
+					{
+						difY = 0 - difY;
+					}
+
+					if ((difX <= compareX) && (difY <= compareY))
+					{
+						if ( max_value > max(difY , difX))
+						{
+							id = i;
+							max_value = max(difY , difX);
+						}
+					}
+				}
+			}
+		}
+		return id;
 	}
-	return list_id;
+	else
+	{
+		return -2;
+	}
 }
 /***************************************************************************************/
 function TRACKING_Update_Why_Exist(t_label , t_listTracking ,dataIndex , dataTime , isPeople){
-	var tableau_t , type_1, type_2 , type_3;
-	console.log(t_listTracking);
 	var list_id= TRACKING_SearchListIdPeopleNear(t_label , t_listTracking , dataIndex , dataTime);
 	return list_id;
 }
 /***************************************************************************************/
-function TRACKING_CheckNearBord(posX , posY){
+function TRACKING_CheckNearBord(PosX , PosY){
 	//Vu in luminaire
-	for (var i = 0 ; i < listConfigLuminaire.length ; i++ ){
+	var posX=Math.round(PosX);
+	var posY=Math.round(PosY);
+	if ( ((posX +5 )<= INIT_MATRIX_WIDTH) && ( (posX -5 ) >= 0)
+			 && ((posY +5 )<= INIT_MATRIX_HEIGHT) && ( (posY - 5 ) >= 0))
+	{
+		console.log("go go here here here");
+		console.log (INIT_MATRIX);
+		console.log(posY *   INIT_MATRIX_WIDTH + (posX -5));
+		console.log("value"+ INIT_MATRIX [  posY *   INIT_MATRIX_WIDTH + (posX -5)]);
+		if (   ( INIT_MATRIX [  posY *   INIT_MATRIX_WIDTH + (posX -5)] >=1 )
+			&& ( INIT_MATRIX [  posY *   INIT_MATRIX_WIDTH + (posX +5)] >=1 )
+			&& ( INIT_MATRIX [(posY-5) * INIT_MATRIX_WIDTH + (posX -5)] >=1 )
+			&& ( INIT_MATRIX [(posY-5) * INIT_MATRIX_WIDTH +   posX   ] >=1 )
+			&& ( INIT_MATRIX [(posY-5) * INIT_MATRIX_WIDTH + (posX +5)] >=1 )
+			&& ( INIT_MATRIX [(posY+5) * INIT_MATRIX_WIDTH + (posX -5)] >=1 )
+			&& ( INIT_MATRIX [(posY+5) * INIT_MATRIX_WIDTH +   posX   ] >=1 )
+			&& ( INIT_MATRIX [(posY+5) * INIT_MATRIX_WIDTH + (posX +5)] >=1 ))
+		{
+			return false;
+		}
 
 	}
+	return true;  
 }
 /*************************************************************************************************/
 //Research in Radius

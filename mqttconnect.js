@@ -84,12 +84,12 @@ client.onMessageArrived = function (message) {
 	showObject();
 	draw();
 	//This section for send data to the serveur
-	getObjectJson();
-	if (( dataTime - time_send_envrionment) > 10*1000)
-	{
-		getEnvironnementJson();
-		time_send_envrionment = dataTime;
-	}
+	//getObjectJson();
+	//if (( dataTime - time_send_envrionment) > 10*1000)
+	//{
+		//getEnvironnementJson();
+		//time_send_envrionment = dataTime;
+	//}
 	//console.log (dEnd - dataTime);
 }
 function showObject()
@@ -100,7 +100,7 @@ function showObject()
 		var char = "ID " + i + " Size " + listTracking[i].S + " X " + listTracking[i].X + " Y " 
 		+ listTracking[i].Y + " fistId  " + listTracking[i].firstUpdateId + " lastId   " + listTracking[i].lastUpdateId 
 		+ " dispo   " + listTracking[i].dispo+ " FirstX " + listTracking[i].firstX + " FirstY " + listTracking[i].firstY + " isPeople   " + listTracking[i].isPeople
-		+ " isbigPpeople " + listTracking[i].isbigObject + " IDnear " + listTracking[i].listIdNear.length +'<br>' ;
+		+ " isbigPpeople " + listTracking[i].isbigObject + " IDnear " + listTracking[i].listIdNear +'<br>' ;
 		all += char;
 		
 	}
@@ -157,71 +157,6 @@ function searchPeople ( tLabel , listTracking ){
 	//when list done; check status candidautre
 	return tableau;
 }
-function DATA_Initialize(){
-	dataIndex = 0;
-	dataTime = 0;
-	//Initializing list Tracking
-	var listNull=[];
-	for (var i = 0 ; i < TRACKING_MAX_OBJECT ; i ++)
-	{
-		var person= {
-			id:i,
-			X:0,
-			Y:0,
-			S:0,
-			isPeople:false,
-			move:false,
-			firstUpdateId:0,
-			firstUpdateTime:0,
-			direction:0,
-			speed:0,
-			lastUpdateId:0,
-			lastUpdateTime:0,
-			dispo:true,
-			firstX:0,
-			firstY:0,
-			id_label:0,
-			listIdbigObject:listNull,
-			isbigObject:0,
-			listIdNear:listNull
-		};
-		listTracking.push(person);
-	}
-	//Initializing listTracking_Old
-	for (var i = 0 ; i < TRACKING_MAX_OBJECT ; i ++)
-	{
-		var person= {
-			id:i,
-			X:0,
-			Y:0,
-			S:0,
-			isPeople:false,
-			move:false,
-			firstUpdateId:0,
-			firstUpdateTime:0,
-			direction:0,
-			speed:0,
-			lastUpdateId:0,
-			lastUpdateTime:0,
-			dispo:true,
-			firstX:0,
-			firstY:0,
-			id_label:0,
-			listIdbigObject:listNull,
-			isbigObject:0,
-			listIdNear:listNull
-		};
-		listTracking_Old.push(person);
-	}
-	//Initializing list Label
-	var obSensors = { mac : 0,ip : 0, luminosity : 0, sound : 0, comsumption : 0 , temperature : 0, presence :0};
-	for (var i = 0; i < listConfigLuminaire.length ; i++){
-		listLabelling[i] =[];
-		listsensors[i]=obSensors;
-	}
-	getEstateJson();
-	return true;
-} 
 /***********************************************************************************************/
 /***********************************************************************************************/
 /***********************************************************************************************/

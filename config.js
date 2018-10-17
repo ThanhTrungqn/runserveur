@@ -6,7 +6,8 @@ var topic = 'oyalight/#';
 var topic_send_global = 'datapole/global';
 var topic_send_environnement = 'datapole/environnement';
 var cleansession = true;
-var reconnectTimeout = 2000; //every reconnect Timeout 2000 milisecond will reconnect
+var reconnectTimeout = 2000; 
+//every reconnect Timeout 2000 milisecond will reconnect
 //Configuration du data Partrimoine
 var Client_Id = 1;
 var Building_Id = 1;
@@ -28,19 +29,25 @@ var DATAPARSE_RADIUS_ADD_SPEED = 		1;			//pixel
 var DATAPARSE_SPEED_FAST = 				200;		//pixel
 var DATAPARSE_PERSON_MOVE_SIZE = 		1;			//pixel
 var DATAPARSE_TIME_PERSON_ACTIVE = 		1000;		//miliseconds
-var DATAPARSE_TIME_PERSON_INACTIVE = 	1000;		//miliseconds
+var DATAPARSE_TIME_PERSON_INACTIVE = 	2000;		//miliseconds
 //Configuration ImageProcessing
 
 //Configuration Tracking
 var TRACKING_MAX_OBJECT =				20;			//255 max object
-var TRACKING_RADIUS_DEFAULT = 			8;			//pixel
+
+var TRACKING_RADIUS_DEFAULT = 			10;			//pixel
+var TRACKING_RADIUS_DEFAULT_1 =			4;
+var TRACKING_RADIUS_DEFAULT_2 =			7;
+var TRACKING_RADIUS_DEFAULT_3 =			10;
+var TRACKING_RADIUS_DEFAULT_4 =			13;
+
 var TRACKING_RADIUS_ADD_DIRECTION = 	2;			//pixel
 var TRACKING_RADIUS_ADD_SPEED = 		1;			//pixel
 var TRACKING_SPEED_FAST = 				200;		//pixel
 var TRACKING_PERSON_MOVE_SIZE = 		2;			//pixel
 var TRACKING_TIME_PERSON_ACTIVE = 		1000;		//miliseconds
-var TRACKING_TIME_PERSON_INACTIVE = 	2000;		//miliseconds
-var TRACKING_PEOPLE_DISTANCE = 			50;			//If distance of this personne mouve to 50 will considered 1 person
+var TRACKING_TIME_PERSON_INACTIVE = 	3000;		//miliseconds
+var TRACKING_PEOPLE_DISTANCE = 			25;			//If distance of this personne mouve to 50 will considered 1 person
 //Configuration DataSend
 var DATASEND_SERVEUR_API = 'https://geo-api.predismart.com/integration-data'; //fournir par DATAPOLE
 var DATASEND_KEYWORD_DATA = 'data';					//fournir par DATAPOLE

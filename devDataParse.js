@@ -120,12 +120,17 @@ function dataConvert (listLabel , idLuminaire ) {
 						r +=sizegrandir;
 					}
 				}
-				var x = (l + r)/2;
-				var y = (t + b)/2;
-				var id = [idLuminaire];
-				var obLabel = { idLum : id, S : s, X : x, Y : y, T : t, B :b, L :l, R : r, 
+				var x = Math.round((l + r)/2);
+				var y = Math.round((t + b)/2);
+
+				//if ( INIT_ZONE_ACTIVE_MATRIX [ y * INIT_MATRIX_WIDTH + x ] == (idLuminaire+1) )
+				if (true)
+				{
+					var id = [idLuminaire];
+					var obLabel = { idLum : id, S : s, X : x, Y : y, T : t, B :b, L :l, R : r, 
 						TOPBORD : tBord, BOTTOMBORD : bBord, LEFTBORD : lBord, RIGHTBORD : rBord , updated : false , tUpdated : false};
-				new_listLabel.push(obLabel);
+					new_listLabel.push(obLabel);
+				}
 			}
 		}
 		return [ true , new_listLabel];
@@ -135,7 +140,7 @@ function dataConvert (listLabel , idLuminaire ) {
 		return [ false , new_listLabel];
 	}
 }
-
+/***************************************************************/
 //this function willl return true if this Label existe
 function checkDoubleLabel ( tLabel1 , tLabel2 ) {
 	//check if 2 label normal ou 1 label petit
@@ -173,6 +178,7 @@ function checkDoubleLabel ( tLabel1 , tLabel2 ) {
 	}
 	return false;
 }
+/******************************************************************/
 //this function update 2 label
 function checkDoubleBordLabel ( tLabel1 , listLabel ){
 	//neu nhu size nho, va gan 1 cai bord nao do

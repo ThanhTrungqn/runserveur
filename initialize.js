@@ -1,4 +1,10 @@
 //This file will contien all function for initialized this system
+var INIT_ZONE_ACTIVE_MATRIX=[];
+var INIT_MATRIX=[];
+var INIT_MATRIX_BORD_IN=[];
+var INIT_MATRIX_BORD_OUT=[];
+var INIT_MATRIX_HEIGHT=0;
+var INIT_MATRIX_WIDTH=0;
 function DATA_Initialize(){
 	dataIndex = 0;
 	dataTime = 0;
@@ -63,8 +69,11 @@ function DATA_Initialize(){
 	}
 	getEstateJson();
 	Init_Create_Matrix(listConfigLuminaire);
+	Init_Create_Zone_Active_Matrix (listConfigLuminaire);
+	console.log(INIT_ZONE_ACTIVE_MATRIX);
 	return true;
 }
+var INIT_ZONE_ACTIVE_MATRIX=[];
 var INIT_MATRIX=[];
 var INIT_MATRIX_HEIGHT=0;
 var INIT_MATRIX_WIDTH=0;
@@ -111,4 +120,23 @@ function Init_Create_Matrix(listConfigLuminaire){
 	}
 	INIT_MATRIX_HEIGHT=heightM;
 	INIT_MATRIX_WIDTH=widthM;
+}
+function Init_Create_Zone_Active_Matrix (listConfigLuminaire){
+	var heightM=INIT_MATRIX_HEIGHT;
+	var widthM=INIT_MATRIX_WIDTH;
+	for (var i = 0 ;  i < heightM*widthM ; i ++ )
+	{
+		INIT_ZONE_ACTIVE_MATRIX.push(0);
+		INIT_MATRIX_BORD_IN.push(0);
+		INIT_MATRIX_BORD_OUT.push(0);
+	}
+	for (var i = 0 ;  i < listConfigLuminaire.length ; i ++ )
+	{
+		for (var heightY = 0 ;  heightY < 32 ; heightY ++ ){
+			for (var widthX = 0 ;  widthX < 32 ; widthX ++ ){
+				var pos =  (listConfigLuminaire[i].PosY +heightY ) * widthM + (listConfigLuminaire[i].PosX + widthX);
+				INIT_ZONE_ACTIVE_MATRIX[pos] = i +1;
+			}
+		}
+	}
 }

@@ -5,6 +5,9 @@ var TRACKING_FIND_BIG_OBJECT_IMMOBILE = 0;
 var TRACKING_FIND_SMALL_OBJECT_IMMOBILE = 1;
 var TRACKING_FIND_SMALL_OBJECT_MOBILE = 2;
 
+
+
+
 //2 variable global
 //var listTracking = [];			//list object tracking
 //var listLabelFinalTracking = [];	//list label need tracking
@@ -63,7 +66,6 @@ function TRACKING(listLabel , listTracking , dataIndex , dataTime){
 			if (listStateLabel[i].tUpdated == false) 
 			{
 				var tLabel = listLabel[i];
-				var list_updated, type1 , type2, type3;
 				var idObject= TRACKING_SearchPeople1( listLabel[i] , listTracking ,dataIndex , dataTime , false); //update xong list
 				if (idObject >=0)
 				{
@@ -78,7 +80,6 @@ function TRACKING(listLabel , listTracking , dataIndex , dataTime){
 		}
 		if (updated==false){
 			continue_loop=false;
-			//console.log("OutLoop");
 		}
 	}
 
@@ -153,7 +154,7 @@ function TRACKING(listLabel , listTracking , dataIndex , dataTime){
 			console.log("go here 666");
 			var newObject = true;
 			var listId=TRACKING_Update_Why_Exist(tLabel, listTracking_Old, dataIndex, dataTime, true);
-			var idObject = TRACKING_FindIdObjectFree();
+			var idObject = TRACKING_FindIdObjectFree(tLabel);
 			TRACKING_UpdateObject (newObject, idObject, tLabel, dataIndex, dataTime , 1 , listId);
 			TRACKING_UpdatedLabel(i,listLabel);
 		}
@@ -175,7 +176,7 @@ function TRACKING_DecidePerson(index , time){
 	var count = 0;
 	for (var i = 0 ; i < listTracking.length ; i++ ){
 		//tính theo thời gian cho chính xác
-		if ( ((time - listTracking[i].lastUpdateTime) < 500)  
+		if ( ((time - listTracking[i].lastUpdateTime) < 1000)  
 			&& ((listTracking[i].lastUpdateTime - listTracking[i].firstUpdateTime ) > 500 ))
 		{
 			if (listTracking[i].isPeople)
@@ -224,7 +225,7 @@ function TRACKING_PersonDisparu(index,time_index ,listLabel){
 		if ( (listTracking[i].isPeople == true) && (listTracking[i].lastUpdateTime < time_index))
 		{
 			//Kiểm tra biến mất ở đâu => nếu biến mất ở cửa thì bye bye
-			if (TRACKING_CheckNearBord(listTracking[i].X,listTracking[i].Y)==false)
+			if (TRACKING_CheckNearBord(listTracking[i].X,listTracking[i].Y)==false)	//Nếu không
 			{
 				var update=false; 
 				//vật này đang sắp biết mất
@@ -328,14 +329,35 @@ function TRACKING_UpdateObjectFree(index , time){
 *this function will be call every update new object
 *return Id Object Free
 **/
-function TRACKING_FindIdObjectFree (){
+function TRACKING_FindIdObjectFree ( label){
 	var indexObject=-1; 
 	for (var i = 0 ; i < listTracking.length ; i++ ){
 		//tính theo thời gian cho chính xác
 		if (listTracking[i].dispo)
 		{
+			var difX = listTracking[i].X - label.X;
+			var difY = listTracking[i].Y - label.Y;
+			//check if valide => update tableau
+			if (difX < 0)
+			{
+				difX = 0 - difX;
+			}
+			if (difY < 0)
+			{
+				difY = 0 - difY;
+			}
+			if ((difX <= 4) && (difY <= 4))
+			{
+				indexObject = i;
+				return indexObject;
+			}
+		}
+	}
+	for (var i = 0 ; i < listTracking.length ; i++ ){
+		if (listTracking[i].dispo)
+		{
 			indexObject = i;
-			break;
+			return indexObject;
 		}
 	}
 	return indexObject;

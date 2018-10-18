@@ -5,6 +5,8 @@ var INIT_MATRIX_BORD_IN=[];
 var INIT_MATRIX_BORD_OUT=[];
 var INIT_MATRIX_HEIGHT=0;
 var INIT_MATRIX_WIDTH=0;
+
+var list_history=[];
 function DATA_Initialize(){
 	dataIndex = 0;
 	dataTime = 0;

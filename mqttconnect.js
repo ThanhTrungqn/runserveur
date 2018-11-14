@@ -178,7 +178,7 @@ function getObjectJson()
 					all +=",";
 				}
 				var char = "{\"id\":"+i+",\"size\":"+listTracking[i].S+",\"x\":"+listTracking[i].X+",\"y\":"
-				+ listTracking[i].Y +",\"direction\":"+listTracking[i].direction+",\"speed\":"+listTracking[i].speed
+				+ listTracking[i].Y+",\"z\":"+ Etage +",\"direction\":"+listTracking[i].direction+",\"speed\":"+listTracking[i].speed
 				+",\"firsttime\":"+listTracking[i].firstUpdateTime+",\"lasttime\":"+listTracking[i].lastUpdateTime
 				+",\"id_cell\":"+ cell_value
 				+"}";
@@ -198,6 +198,7 @@ function getObjectJson()
         	// Request finished. Do processing here.
     	}
 	}
+	console.log(all);
 	xhr.send("data="+all+"&type_data=global"); 
 }
 function getEnvironnementJson()
@@ -218,8 +219,8 @@ function getEnvironnementJson()
 		{
 			all +=",";
 		}
-		var char ="{\"id_cell\":"+"\""+listConfigLuminaire[i].id+"\""+ ",\"sensors\":{\"presence\":"+listsensors[i].presence+",\"luminosity\":"+listsensors[i].luminosity
-		+",\"temperature\":"+listsensors[i].temperature+",\"sound\":"+listsensors[i].sound+",\"consumption\":"+listsensors[i].consumption+"}}";
+		var char ="{\"id_cell\":"+"\""+listConfigLuminaire[i].id+"\""+ ",\"presence\":"+listsensors[i].presence+",\"luminosity\":"+listsensors[i].luminosity
+		+",\"temperature\":"+listsensors[i].temperature+",\"sound\":"+listsensors[i].sound+",\"consumption\":"+listsensors[i].consumption+"}";
 		all += char;
 		addsymbole= true;
 	}
@@ -233,13 +234,15 @@ function getEnvironnementJson()
         	// Request finished. Do processing here.
     	}
 	}
+	console.log(all);
 	xhr.send("data="+all+"&type_data=environment"); 
 }
 function getEstateJson()
 {
 	var all="";
 	var addsymbole=false;
-	all="{\"client_id\":"+Client_Id+",\"building_id\":"+Building_Id+",\"room_id\":"+Room_Id+",\"list_cell\":["
+	var vartime = new Date().getTime();
+	all="{\"client_id\":"+Client_Id+",\"building_id\":"+Building_Id+",\"room_id\":"+Room_Id+",\"time\":"+vartime+",\"list_cell\":["
 	for (var i =0 ; i < listConfigLuminaire.length ; i++)
 	{
 		if (addsymbole)
@@ -253,11 +256,11 @@ function getEstateJson()
 				  +"\"y\":" 			  + listConfigLuminaire[i].PosY + ","
 				  +"\"z\":" 			  + Etage 						+ ","
 				  +"\"time\":"+dataTime + ","
-				  +"\"cordonnees_contour\":["
-				  +"["+listConfigLuminaire[i].PosX+","+listConfigLuminaire[i].PosY+","+Etage+"],"
-				  +"["+(listConfigLuminaire[i].PosX+32)+","+listConfigLuminaire[i].PosY+","+Etage+"],"
-				  +"["+(listConfigLuminaire[i].PosX+32)+","+(listConfigLuminaire[i].PosY+32)+","+Etage+"],"
-				  +"["+listConfigLuminaire[i].PosX+","+(listConfigLuminaire[i].PosY+32)+","+Etage+"]"+"],"
+				  +"\"coordonnees_contour\":["
+				  +"{"+'"x":'+listConfigLuminaire[i].PosX+","+'"y":'+listConfigLuminaire[i].PosY+","+'"z":'+Etage+"},"
+				  +"{"+'"x":'+(listConfigLuminaire[i].PosX+32)+","+'"y":'+listConfigLuminaire[i].PosY+","+'"z":'+Etage+"},"
+				  +"{"+'"x":'+(listConfigLuminaire[i].PosX+32)+","+'"y":'+(listConfigLuminaire[i].PosY+32)+","+'"z":'+Etage+"},"
+				  +"{"+'"x":'+listConfigLuminaire[i].PosX+","+'"y":'+(listConfigLuminaire[i].PosY+32)+","+'"z":'+Etage+"}"+"],"
 				  +"\"rotation\":"+ 0 + ","
 				  //+"list_zone_interet:"
 				  //{ "id": "zone_interet_1", // internal GEO identifier 
@@ -265,12 +268,13 @@ function getEstateJson()
     				//"ref_point": {"x": val_x, "y": val_y, "z": val_z},            
     				//"coordonnees_contour" : [ 
         			//{"x": val_x, "y": val_y, "z": val_z}],}
-				  +'list_capteurs:'
+				  +'"list_capteurs":'
 				  +'[{"id":"capteur_1","name":"SENSE1","type":"thermique"},'
 				  +'{"id":"capteur_2","name":"SENSE2","type":"sound"},'
 				  +'{"id":"capteur_3","name":"SENSE3","type":"luminosity"}]'
 				  +"}";
 		all += char;
+		addsymbole= true;
 	}
 	all +="]";
 	//all +="\"list_objects\":[],"+"\"list_button\":[],"+"\"tracking_config\":{}}";

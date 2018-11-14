@@ -1,8 +1,13 @@
 var color_take=["#ff0000","#770000","#330000","#337700","#777700","#007700","#00ff00","#00ffff","#0077ff","#000000","#444444","#0000ff"];
 function draw(){
-
 	var canvas = document.getElementById("mycanvas");
 	var ctx = canvas.getContext("2d");
+	if (canvas.height != INIT_MATRIX_HEIGHT*10){
+		canvas.height = INIT_MATRIX_HEIGHT*10;
+	}
+	if (canvas.width != INIT_MATRIX_WIDTH*10){
+		canvas.width = INIT_MATRIX_WIDTH*10;
+	} 
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	for (var i =0 ; i< TRACKING_MAX_OBJECT ; i++ )
 	{
@@ -22,6 +27,7 @@ function draw(){
 			}
 		}
 	}
+	/*
 	for(var i=0;i< INIT_MATRIX_HEIGHT ; i++)
 	{
 		for (var j =0 ; j< INIT_MATRIX_WIDTH ; j++)
@@ -38,4 +44,5 @@ function draw(){
 			}
 		}
 	}
+	*/
 }

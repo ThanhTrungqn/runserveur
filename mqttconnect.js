@@ -1,11 +1,14 @@
 //*****************************************************************//
-var TRACKING_RADIUS_DEFAULT = 8;
-var TRACKING_RADIUS_ADD_DIRECTION = 2;
-var TRACKING_RADIUS_ADD_SPEED = 1;
-var TRACKING_SPEED_FAST = 200;
-var TRACKING_SPEED_MOYEN = 100;
+var TRACKING_Config =Init_Tracking_Config();
+var LABEL_Config;
+
+
+
+
+
 //Using the HiveMQ public Broker, with a random client Id
-var client = new Messaging.Client(host , port, "myclientid_" + parseInt(Math.random() * 100, 10));
+var client = new Messaging.Client(host , port, "local_aplication_" + parseInt(Math.random() * 100, 10));
+
 //*****************************************************************//
 //*************CODE FOR MQTT CLIENT, DONT CHANGE PLS***************//
 //*****************************************************************//
@@ -77,19 +80,19 @@ client.onMessageArrived = function (message) {
 		//Todo: fiabilite cet partie
 
 		//Step 5: Tracking listLabelFinalTracking
-		nb_person = TRACKING(listLabelFinalTracking , listTracking , dataIndex , dataTime);
+		nb_person = TRACKING(listLabelFinalTracking , listTracking , dataIndex , dataTime , TRACKING_Config);
 	}
 	//console.log (nb_person);
 	var dEnd = new Date().getTime();
 	showObject();
 	draw();
 	//This section for send data to the serveur
-	//getObjectJson();
-	//if (( dataTime - time_send_envrionment) > 10*1000)
-	//{
-		//getEnvironnementJson();
-		//time_send_envrionment = dataTime;
-	//}
+	getObjectJson();
+	if (( dataTime - time_send_envrionment) > 10*1000)
+	{
+		getEnvironnementJson();
+		time_send_envrionment = dataTime;
+	}
 	//console.log (dEnd - dataTime);
 }
 function showObject()
@@ -134,11 +137,6 @@ function Labeling(listLabelling) {
 			}
 		}
 	}
-	//verify listLabelFinal
-	//check if existe label in valide bord?  if not delete Label;
-	//for (var i = 0 ; i < listLabelFinal.length ; i++) {
-	//	if ((listLabelFinal[i].S <20)&&(listLabelFinal[i].))
-	//}
 	return listLabelFinal;
 }
 /**************************************************************************/
@@ -168,26 +166,29 @@ function getObjectJson()
 	var addsymbole=false;
 	cell_value=0;
 	zone_interet_value=0
-	all="{\"id\":"+dataIndex+",\"Client_Id\":"+Client_Id+",\"Building_Id\":"+Building_Id+",\"Room_Id\":"+Room_Id+",\"time\":"+dataTime+",\"person\":["
-	for (var i =0 ; i < TRACKING_MAX_OBJECT ; i++)
-	{
-		if ((listTracking[i].isPeople)&&((listTracking[i].lastUpdateTime - listTracking[i].firstUpdateTime)>=2000))
+	all="{\"id\":"+dataIndex+",\"client_id\":"+Client_Id+",\"building_id\":"+Building_Id+",\"room_id\":"+Room_Id+",\"time\":"+dataTime;
+	if( nb_person > 0){
+		all+=",\"person\":["
+		for (var i =0 ; i < TRACKING_MAX_OBJECT ; i++)
 		{
-			if (addsymbole)
+			if (listTracking[i].isPeople)
 			{
-				all +=",";
+				if (addsymbole)
+				{
+					all +=",";
+				}
+				var char = "{\"id\":"+i+",\"size\":"+listTracking[i].S+",\"x\":"+listTracking[i].X+",\"y\":"
+				+ listTracking[i].Y +",\"direction\":"+listTracking[i].direction+",\"speed\":"+listTracking[i].speed
+				+",\"firsttime\":"+listTracking[i].firstUpdateTime+",\"lasttime\":"+listTracking[i].lastUpdateTime
+				+",\"id_cell\":"+ cell_value
+				+"}";
+				all += char;
+				addsymbole= true;
 			}
-			var char = "{\"ID\":"+i+",\"Size\":"+listTracking[i].S+",\"X\":"+listTracking[i].X+",\"Y\":"
-			+ listTracking[i].Y +",\"Direction\":"+listTracking[i].direction+",\"Speed\":"+listTracking[i].speed
-			+",\"FirstTime\":"+listTracking[i].firstUpdateTime+",\"LastTime\":"+listTracking[i].lastUpdateTime
-			+",\"id_cell\":"+ cell_value
-			+",\"id_zone\":"+ zone_interet_value
-			+"}";
-			all += char;
-			addsymbole= true;
 		}
+		all+="]"
 	}
-	all+="],\"actions_button\":[]}"
+	all+="}"
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", 'https://geo-api.predismart.com/integration-data', true);
 	//Send the proper header information along with the request
@@ -203,9 +204,16 @@ function getEnvironnementJson()
 {
 	var all="";
 	var addsymbole=false;
-	all="{\"client_id\":"+Client_Id+",\"building_id\":"+Building_Id+",\"room_dd\":"+Room_Id+",\"time\":"+dataTime+",\"data\":["
+	all="{\"client_id\":"+Client_Id+",\"building_id\":"+Building_Id+",\"room_id\":"+Room_Id+",\"time\":"+dataTime+",\"data\":["
 	for (var i =0 ; i < listConfigLuminaire.length ; i++)
 	{
+		if ((listsensors[i].sound==0)  
+			|| (listsensors[i].temperature==0))
+		{
+			console.log ("dont send");
+			return false;
+		}
+
 		if (addsymbole)
 		{
 			all +=",";
@@ -215,7 +223,7 @@ function getEnvironnementJson()
 		all += char;
 		addsymbole= true;
 	}
-	all+="]}"
+	all+="]}";
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", 'https://geo-api.predismart.com/integration-data', true);
 	//Send the proper header information along with the request
@@ -241,21 +249,42 @@ function getEstateJson()
 		var char ="{\"id\":"       + "\"" + listConfigLuminaire[i].id 	+ "\","
 				  +"\"firmware\":" + "\"" + Firmware 					+ "\","
 				  +"\"mac_eyo\":"  + "\"" + listConfigLuminaire[i].mac 	+ "\","
-				  +"\"PosX\":"			  + listConfigLuminaire[i].PosX + ","
-				  +"\"PosY\":" 			  + listConfigLuminaire[i].PosY + ","
-				  +"\"PosZ\":" 			  + Etage 						+ ","
-				  +"\"cordonnes_contour\":["
-				  +"["+listConfigLuminaire[i].PosX+","+listConfigLuminaire[i].PosY+","+Etage+"]"
-				  +"["+(listConfigLuminaire[i].PosX+32)+","+listConfigLuminaire[i].PosY+","+Etage+"]"
-				  +"["+(listConfigLuminaire[i].PosX+32)+","+(listConfigLuminaire[i].PosY+32)+","+Etage+"]"
+				  +"\"x\":"			  + listConfigLuminaire[i].PosX + ","
+				  +"\"y\":" 			  + listConfigLuminaire[i].PosY + ","
+				  +"\"z\":" 			  + Etage 						+ ","
+				  +"\"time\":"+dataTime + ","
+				  +"\"cordonnees_contour\":["
+				  +"["+listConfigLuminaire[i].PosX+","+listConfigLuminaire[i].PosY+","+Etage+"],"
+				  +"["+(listConfigLuminaire[i].PosX+32)+","+listConfigLuminaire[i].PosY+","+Etage+"],"
+				  +"["+(listConfigLuminaire[i].PosX+32)+","+(listConfigLuminaire[i].PosY+32)+","+Etage+"],"
 				  +"["+listConfigLuminaire[i].PosX+","+(listConfigLuminaire[i].PosY+32)+","+Etage+"]"+"],"
 				  +"\"rotation\":"+ 0 + ","
-				  +"zone_interet:[]"
+				  //+"list_zone_interet:"
+				  //{ "id": "zone_interet_1", // internal GEO identifier 
+    				//"objet_id": 1, // internal GEO identifier 
+    				//"ref_point": {"x": val_x, "y": val_y, "z": val_z},            
+    				//"coordonnees_contour" : [ 
+        			//{"x": val_x, "y": val_y, "z": val_z}],}
+				  +'list_capteurs:'
+				  +'[{"id":"capteur_1","name":"SENSE1","type":"thermique"},'
+				  +'{"id":"capteur_2","name":"SENSE2","type":"sound"},'
+				  +'{"id":"capteur_3","name":"SENSE3","type":"luminosity"}]'
 				  +"}";
 		all += char;
 	}
-	all +="]"+"\"list_object\":[],"+"\"list_button\":[],"+"\"tracking_config\":{}}";
-	//publish (all, topic_send_environnement , 0);
+	all +="]";
+	//all +="\"list_objects\":[],"+"\"list_button\":[],"+"\"tracking_config\":{}}";
+	all +=",\"tracking_config\":{"
+		+'"tracking_max_object":5,'
+        +'"tracking_radius_default":6,'
+        +'"tracking_radius_add_direction":2,'
+        +'"tracking_radius_add_speed":1,'
+        +'"tracking_speed_fast":200,'
+        +'"tracking_person_move_size":2,'
+        +'"tracking_time_person_active":1000,'
+        +'"tracking_time_person_inactive":2000'
+        +"}"
+	all +="}";
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", 'https://geo-api.predismart.com/integration-data', true);
 	//Send the proper header information along with the request

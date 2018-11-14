@@ -1,9 +1,10 @@
 //This script, do the funtion data processing before;
 //function take object
-var BORDSIZE = 4;
-var BORDADD = 3;
-var IMAGEHEIGHT = 32;
-var IMAGEWIDTH = 32;
+
+var BORDSIZE 					= 4;
+var BORDADD 					= 3;
+var IMAGEHEIGHT 				= 32;
+var IMAGEWIDTH 					= 32;
 
 function parseJson(message) {
 	var listobjet = [];
@@ -23,27 +24,23 @@ function parseJson(message) {
 				break;
 			}
 		}
-		var json_ip  = json.luminaire.ip;
-		var json_presence    = json.luminaire.sensors.presence;
-		var json_tlabel = json.luminaire.sensors.tLabel;
-		var json_luminosity = json.luminaire.sensors.luminosity;
-		var json_sound = json.luminaire.sensors.sound_level;
-		var json_consumption = json.luminaire.sensors.consumption;
-		var json_temperature = json.luminaire.sensors.temperature;
-		var json_presence = json.luminaire.sensors.presence;
+		var json_ip  			= json.luminaire.ip;
+		var json_presence    	= json.luminaire.sensors.presence;
+		var json_tlabel 		= json.luminaire.sensors.tLabel;
+		var json_luminosity 	= json.luminaire.sensors.luminosity;
+		var json_sound 			= json.luminaire.sensors.sound_level;
+		var json_consumption 	= json.luminaire.sensors.consumption;
+		var json_temperature 	= json.luminaire.sensors.temperature;
+		var json_presence 		= json.luminaire.sensors.presence;
 		var result = true;
-		//console.log (json_mac);
-		//if (json_tlabel.length >= 1)
-		//{
-		//	console.log(json_tlabel[0].size);
-		//	console.log (json_tlabel[0]);
-		//}
+
 		return [result, json_mac, idLuminaire, json_ip, json_presence, json_tlabel , json_luminosity,json_sound,json_consumption,json_temperature,json_presence];
 	} catch (e) {
 		var result = false;
 		return [result, json_mac, idLuminaire, json_ip, json_presence, json_tlabel , json_luminosity,json_sound,json_consumption,json_temperature,json_presence];
 	}
 }
+
 function dataSensors ( json_mac, json_ip, json_luminosity, json_sound, json_consumption , json_temperature, json_presence)
 {
 	var obLabel = { mac : "\""+json_mac+"\"",ip : json_ip, luminosity : json_luminosity, sound : json_sound, consumption : json_consumption , temperature : json_temperature, presence :json_presence};
@@ -57,10 +54,10 @@ function dataConvert (listLabel , idLuminaire ) {
 		var lumPosY = listConfigLuminaire[idLuminaire].PosY;
 		for ( var i = 0 ; i < listLabel.length ; i++)
 		{
-			if (((listLabel[i].t+listLabel[i].b) >= 4 )
-				&&((listLabel[i].t+listLabel[i].b) <= 58 )
-				&&((listLabel[i].r+listLabel[i].l) >= 4 )
-				&&((listLabel[i].r+listLabel[i].l) <= 58 ))
+			if ( (((listLabel[i].t+listLabel[i].b) >= 4 )||(listLabel[i].size >= 25))
+				&& (((listLabel[i].t+listLabel[i].b) <= 58 )||(listLabel[i].size >= 25))
+				&& (((listLabel[i].r+listLabel[i].l) >= 4 ) ||(listLabel[i].size >= 25))
+				&& (((listLabel[i].r+listLabel[i].l) <= 58 ) ||(listLabel[i].size >= 25)))
 			{
 				var s = listLabel[i].size;
 				var t = listLabel[i].t + lumPosY;
@@ -128,6 +125,7 @@ function dataConvert (listLabel , idLuminaire ) {
 				{
 					var id = [idLuminaire];
 					var obLabel = { idLum : id, S : s, X : x, Y : y, T : t, B :b, L :l, R : r, 
+						nbrUpdated : 0, nbrBig : 0, canUpdateMore : false,
 						TOPBORD : tBord, BOTTOMBORD : bBord, LEFTBORD : lBord, RIGHTBORD : rBord , updated : false , tUpdated : false};
 					new_listLabel.push(obLabel);
 				}
@@ -144,6 +142,14 @@ function dataConvert (listLabel , idLuminaire ) {
 //this function willl return true if this Label existe
 function checkDoubleLabel ( tLabel1 , tLabel2 ) {
 	//check if 2 label normal ou 1 label petit
+	//Nếu cùng list
+	for (var  i = 0 ;  i < tLabel1.idLum.length ; i++ ){
+		for (var  j = 0 ;  j < tLabel2.idLum.length ; j++ ){
+			if (tLabel1.idLum[i] == tLabel2.idLum[j] ){
+				return false;
+			}
+		}
+	}
 	var difX = tLabel1.X - tLabel2.X;
 	var difY = tLabel1.Y - tLabel2.Y;
 	var height=3;
@@ -227,7 +233,8 @@ function updateLabel ( tLabel1 , tLabel2 ) {
 	var idLuminaire = id1.concat(id2);
 	var x = (l + r)/2;
 	var y = (t + b)/2;
-	var obLabel = { idLum : idLuminaire, S : s, X : x, Y : y, T : t, B :b, L :l, R : r, 
+	var obLabel = { idLum : idLuminaire, S : s, X : x, Y : y, T : t, B :b, L :l, R : r,
+					nbrUpdated : 0, nbrBig : 0, canUpdateMore : false,
 					TOPBORD : tBord, BOTTOMBORD : bBord, LEFTBORD : lBord, RIGHTBORD : rBord , updated : false, tUpdated : false};
 	return obLabel;
 }

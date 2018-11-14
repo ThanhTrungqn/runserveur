@@ -31,27 +31,3 @@ var DATAPARSE_PERSON_MOVE_SIZE = 		1;			//pixel
 var DATAPARSE_TIME_PERSON_ACTIVE = 		1000;		//miliseconds
 var DATAPARSE_TIME_PERSON_INACTIVE = 	2000;		//miliseconds
 //Configuration ImageProcessing
-
-//Configuration Tracking
-var TRACKING_MAX_OBJECT =				20;			//255 max object
-
-var TRACKING_RADIUS_DEFAULT = 			10;			//pixel
-var TRACKING_RADIUS_DEFAULT_1 =			4;
-var TRACKING_RADIUS_DEFAULT_2 =			7;
-var TRACKING_RADIUS_DEFAULT_3 =			10;
-var TRACKING_RADIUS_DEFAULT_4 =			13;
-
-var TRACKING_RADIUS_ADD_DIRECTION = 	2;			//pixel
-var TRACKING_RADIUS_ADD_SPEED = 		1;			//pixel
-var TRACKING_SPEED_FAST = 				200;		//pixel
-var TRACKING_PERSON_MOVE_SIZE = 		2;			//pixel
-var TRACKING_TIME_PERSON_ACTIVE = 		1000;		//miliseconds
-var TRACKING_TIME_PERSON_INACTIVE = 	3000;		//miliseconds
-var TRACKING_PEOPLE_DISTANCE = 			25;			//If distance of this personne mouve to 50 will considered 1 person
-//Configuration DataSend
-var DATASEND_SERVEUR_API = 'https://geo-api.predismart.com/integration-data'; //fournir par DATAPOLE
-var DATASEND_KEYWORD_DATA = 'data';					//fournir par DATAPOLE
-var DATASEND_KEYWORD_DATATYPE = 'type_data';		//fournir par DATAPOLE
-var DATASEND_TIME_ESTATEDATA =			0;			//seconds
-var DATASEND_TIME_ENVIRONMENT = 		10;			//seconds
-var DATASEND_TIME_GLOBAL = 				0;			//seconds
